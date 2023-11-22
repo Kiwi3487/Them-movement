@@ -1,35 +1,38 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public static class InputManager
 {
-    private static Controls _controls;
-    public static void Init(Player myPlayer)
+    private static GameControls _gameControls;
+    
+    public static void Init(Characters myCharacter)
     {
-        _controls = new Controls();
+        _gameControls = new GameControls();
 
-        _controls.Game.Movement.performed += ctx =>
+        _gameControls.Permanent.Enable();
+
+        _gameControls.Game.Movement.performed += ctx =>
         {
-            myPlayer.SetMovementDirection(ctx.ReadValue<Vector3>());
+            myCharacter.SetMovementDirection(ctx.ReadValue<Vector3>());
         };
 
-        _controls.Game.Jump.performed += ctx =>
+        _gameControls.Game.Jump.started += jup =>
         {
-            myPlayer.SetJumpDirection(ctx.ReadValue<Vector2>());
+            myCharacter.Jump();
         };
+    }
 
-        _controls.Permanent.Enable();
-    }
-    public static void Gamemode()
+    public static void SetGameControls()
     {
-        _controls.Game.Enable();
-        _controls.UI.Disable();
+        _gameControls.Game.Enable();
+        _gameControls.UI.Disable();
     }
-    public static void UIMode()
+
+    public static void SetUIControls()
     {
-        _controls.Game.Disable();
-        _controls.UI.Enable();
+        _gameControls.UI.Enable();
+        _gameControls.Game.Disable();
     }
+    
 }

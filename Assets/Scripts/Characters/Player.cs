@@ -1,39 +1,53 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-public class Player : MonoBehaviour
+public class Characters : MonoBehaviour
 {
     [SerializeField] private float speed;
-    [SerializeField] private float height;
-    private Vector3 _moveDir;
-    private Vector2 _jumpDir;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private LayerMask groundLayers;
+    private bool isGrounded;
+    private Vector3 _moveDirection;
+
     private Rigidbody rb;
+    private float depth;
     
+    // Start is called before the first frame update
     void Start()
     {
-        InputManager.Init(myPlayer: this);
-        InputManager.Gamemode();
-        
+        InputManager.Init(this);
+        InputManager.SetGameControls();
+
         rb = GetComponent<Rigidbody>();
+        depth = GetComponent<Collider>().bounds.size.y;
     }
-    
+
+    // Update is called once per frame
     void Update()
     {
-        Vector3 movement = new Vector3(_moveDir.x * speed, _jumpDir.y * height, _moveDir.z * speed);
-        
-        rb.velocity = movement;
+        transform.position += (speed * Time.deltaTime * _moveDirection);
+        CheckGround();
     }
 
-    public void SetMovementDirection(Vector3 newDirection)
+    public void SetMovementDirection(Vector3 currentDirection)
     {
-        _moveDir = newDirection;
+        _moveDirection = currentDirection;
     }
 
-    public void SetJumpDirection(Vector2 newYDir)
+    public void Jump()
     {
-        _jumpDir = newYDir;
+        if (isGrounded)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
     }
+
+    private void CheckGround()
+    {
+        isGrounded = Physics.Raycast(transform.position, Vector3.down, depth,groundLayers);
+        Debug.DrawRay(transform.position, Vector3.down * depth, 
+            Color.green, 0 , false);
+    }
+
 }
